@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  CompaniesController.swift
 //  Core Data Contacts
 //
 //  Created by Puroof on 4/22/18.
@@ -8,18 +8,30 @@
 
 import UIKit
 
-class CompaniesController: UITableViewController {
+class CompaniesController: UITableViewController, CreateCompanyControllerDelegate {
+    func didAddCompany(company: Company) {
+        // 1 - Modify Array
+        companies.append(company)
+        
+        // 2 - Insert a new index into tableView
+        let newIndexPath = IndexPath(row: companies.count - 1, section: 0)
+        tableView.insertRows(at: [newIndexPath], with: .automatic)
+    }
+    
 
     let cellId = "cellId"
     
-    let companies = [
+    var companies = [
         Company(name: "Apple", founded: Date()),
         Company(name: "Google", founded: Date()),
         Company(name: "Facebook", founded: Date())
     ]
     
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+//        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "TEST ADD", style: .plain, target: self, action: #selector(addCompany))
         
         navigationItem.title = "Companies"
         tableView.backgroundColor = .darkBlue
@@ -38,9 +50,10 @@ class CompaniesController: UITableViewController {
 
     @objc func handleAddCompany() {
         let createCompanyController = CreateCompanyController()
-//        createCompanyController.view.backgroundColor = .green
         let navController = UINavigationController(rootViewController: createCompanyController)
 
+        createCompanyController.delegate = self
+        
         present(navController, animated: true, completion: nil)
     }
     
