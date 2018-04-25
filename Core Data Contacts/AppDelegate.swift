@@ -15,6 +15,13 @@ class CustomNavigationController: UINavigationController {
     }
 }
 
+// The time and battery indicators will be white
+extension UINavigationController {
+    open override var preferredStatusBarStyle: UIStatusBarStyle {
+        return .lightContent
+    }
+}
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
