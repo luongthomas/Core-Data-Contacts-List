@@ -12,9 +12,16 @@ import CoreData
 // Custom Delegation
 protocol CreateCompanyControllerDelegate {
     func didAddCompany(company: Company)
+    func didEditCompany(company: Company)
 }
 
 class CreateCompanyController: UIViewController {
+    
+    var company: Company? {
+        didSet {
+            nameTextField.text = company?.name
+        }
+    }
     
     // Not tightly coupled, any other view controller can access this protocol's endpoint
     var delegate: CreateCompanyControllerDelegate?
@@ -35,18 +42,46 @@ class CreateCompanyController: UIViewController {
         return textField
     }()
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationItem.title = company == nil ? "Create Company" : "Edit Company"
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         view.backgroundColor = .yellow
         
-        navigationItem.title = "Create Company"
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(handleCancel))
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(handleSave))
         
         setupUI()
     }
     
-    @objc func handleSave() {
+    @objc private func handleSave() {
+        if company == nil {
+            createCompany()
+        } else {
+            saveCompanyChanges()
+        }
+    }
+    
+    private func saveCompanyChanges() {
+        let context = CoreDataManager.shared.persistentContainer.viewContext
+        guard let company = self.company else { return }
+        company.name = nameTextField.text
+        do {
+            try context.save()
+            dismiss(animated: true, completion: {
+                self.delegate?.didEditCompany(company: company)
+            })
+        } catch let saveErr {
+            print("Failed to save company changes: ", saveErr)
+        }
+        
+    }
+    
+    @objc func createCompany() {
         print("Trying to save company...")
         
         // initialization of our Core Data stack

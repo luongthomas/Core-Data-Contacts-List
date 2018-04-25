@@ -19,6 +19,14 @@ class CompaniesController: UITableViewController, CreateCompanyControllerDelegat
         tableView.insertRows(at: [newIndexPath], with: .automatic)
     }
     
+    func didEditCompany(company: Company) {
+        // Update tableview
+        if let row = companies.index(of: company) {
+            let reloadIndexPath = IndexPath(row: row, section: 0)
+            tableView.reloadRows(at: [reloadIndexPath], with: .middle)
+        }
+    }
+    
 
     let cellId = "cellId"
     
@@ -96,11 +104,23 @@ class CompaniesController: UITableViewController, CreateCompanyControllerDelegat
             }
         }
         
-        let editAction = UITableViewRowAction(style: .normal, title: "Edit") { (_, indexPath) in
-            print("Editting company...")
-        }
         
+        let editAction = UITableViewRowAction(style: .normal, title: "Edit", handler: editHandlerFunction)
+
+        deleteAction.backgroundColor = UIColor.lightRed
+        editAction.backgroundColor = UIColor.darkBlue
         return [deleteAction, editAction]
+    }
+    
+    private func editHandlerFunction(action: UITableViewRowAction, indexPath: IndexPath) {
+        print("Editing company in separate function")
+        
+        let editCompanyController = CreateCompanyController()
+        editCompanyController.delegate = self
+        editCompanyController.company = companies[indexPath.row]
+        let navController = CustomNavigationController(rootViewController: editCompanyController)
+        
+        present(navController, animated: true, completion: nil)
     }
     
     // Header code
