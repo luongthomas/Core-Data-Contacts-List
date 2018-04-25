@@ -27,11 +27,8 @@ class CompaniesController: UITableViewController, CreateCompanyControllerDelegat
         }
     }
     
-
     let cellId = "cellId"
-    
     var companies = [Company]()
-    
     
     private func fetchCompanies() {
         // initialization of our Core Data stack
@@ -138,8 +135,20 @@ class CompaniesController: UITableViewController, CreateCompanyControllerDelegat
         let cell = tableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath)
         
         let company = companies[indexPath.row]
+        if let name = company.name, let founded = company.founded {
+
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateFormat = "MMM dd, yyyy"
+            
+            let foundedDateString = dateFormatter.string(from: founded)
+            let dateString = "\(name) - Founded: \(foundedDateString)"
+            
+            cell.textLabel?.text = dateString
+        } else {
+            cell.textLabel?.text = company.name
+        }
+        
         cell.backgroundColor = .tealColor
-        cell.textLabel?.text = company.name
         cell.textLabel?.textColor = .white
         cell.textLabel?.font = UIFont.boldSystemFont(ofSize: 16)
         return cell
