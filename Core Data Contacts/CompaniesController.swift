@@ -57,6 +57,8 @@ class CompaniesController: UITableViewController, CreateCompanyControllerDelegat
         
         fetchCompanies()
         
+        navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Reset", style: .plain, target: self, action: #selector(handleReset))
+        
         navigationItem.title = "Companies"
         tableView.backgroundColor = .darkBlue
 
@@ -69,9 +71,50 @@ class CompaniesController: UITableViewController, CreateCompanyControllerDelegat
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellId)
         
         navigationItem.rightBarButtonItem = UIBarButtonItem(image: #imageLiteral(resourceName: "plus").withRenderingMode(.alwaysOriginal), style: .plain, target: self, action: #selector(handleAddCompany))
-        
     }
 
+    @objc func handleReset() {
+        print("Attempting to delete all core data objects")
+        // Remove elements from table and animate the removal so it shifts to the left
+        let context = CoreDataManager.shared.persistentContainer.viewContext
+        
+        let batchDeleteRequest = NSBatchDeleteRequest(fetchRequest: Company.fetchRequest())
+        do {
+            try context.execute(batchDeleteRequest)
+            
+            // Upon deletion from core data succeeded
+            var indexPathToRemove = [IndexPath]()
+            for (index, _) in companies.enumerated() {
+                let indexPath = IndexPath(row: index, section: 0)
+                indexPathToRemove.append(indexPath)
+            }
+        
+            companies.removeAll()
+            tableView.deleteRows(at: indexPathToRemove, with: .left)
+            
+            
+//            tableView.reloadData()
+            
+            
+        } catch let delErr {
+            print("Failed to delete objects from Core Data: ", delErr)
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        let label = UILabel()
+        label.text = "No companies available..."
+        label.textColor = .white
+        label.textAlignment = .center
+        label.font = UIFont.boldSystemFont(ofSize: 16)
+        return label
+    }
+    
+    override func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        // Footers center their content vertically, change the height and the font will go down
+        return companies.count == 0 ? 150 : 0
+    }
+    
     @objc func handleAddCompany() {
         let createCompanyController = CreateCompanyController()
         let navController = UINavigationController(rootViewController: createCompanyController)
